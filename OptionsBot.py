@@ -43,7 +43,9 @@ class Bot:
         self.in_trade = False
 
         #Get current options chains
-        #self.chains = self.ib.reqSecDefOptParams(self.underlying.symbol, '', self.underlying.secType, self.underlying.conId)
+        self.chains = self.ib.reqSecDefOptParams(self.underlying.symbol, '', self.underlying.secType, self.underlying.conId)
+        for chain in self.chains:
+            print(chain)
         #print(self.chains[0])
 
         #request real time market data
@@ -53,5 +55,18 @@ class Bot:
     #pass real time  bar data back to bot
     def on_bar_update(self, reqId, time, open_, high, low, close,volume, wap, count):
         print(reqId)
+
+    def get_option_delta(self, contract):
+        # Request market data for option contract including Greeks
+        market_data = self.ib.reqMktData(contract, genericTickList="100", snapshot=False, regulatorySnapshot=False)
+
+        # Wait for the market data to be updated
+        self.ib.sleep(2)  # Adjust sleep time as needed for data to arrive
+        
+        # Access the delta from the market data
+        if market_data:
+            delta = market_data.delta
+            print(f"Option: {contract.symbol}, Delta: {delta}")
+
 #start bot
 bot = Bot()
