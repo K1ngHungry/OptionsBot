@@ -18,11 +18,23 @@ class Bot:
         self.positions = self.ib.positions()
         print("Current Portfolio:")
         for position in self.positions:
-            print(f"Symbol: {position.contract.symbol}, "
-                    f"Type: {position.contract.secType}, "
-                    f"Quantity: {position.position}, "
-                    f"Average Cost: {position.avgCost}")
-
+            option = Option(
+                symbol=position.contract.symbol,  # The underlying symbol
+                lastTradeDateOrContractMonth=position.contract.lastTradeDateOrContractMonth,  # Expiration date
+                strike=position.contract.strike,  # Strike price
+                right=position.contract.right,  # 'C' for call, 'P' for put
+                exchange="SMART"  # Exchange where the option is traded
+            )
+            self.ib.qualifyContracts(option)
+            print(f"Created Option: {option}")
+            '''print(f"Symbol: {option.symbol}, "
+              f"Type: {position.contract.secType}, "
+              f"Quantity: {position.position}, "
+              f"Strike: {option.strike}, "
+              f"Expiry: {option.lastTradeDateOrContractMonth}, "
+              f"Right: {option.right}, "
+              f"Right: {option.}")'''
+            self.get_option_delta(option)
         # Create SPY Contract
         self.underlying = Stock('SPY', 'SMART', 'USD')
         self.ib.qualifyContracts(self.underlying)
@@ -44,9 +56,8 @@ class Bot:
 
         #Get current options chains
         self.chains = self.ib.reqSecDefOptParams(self.underlying.symbol, '', self.underlying.secType, self.underlying.conId)
-        for chain in self.chains:
-            print(chain)
-        #print(self.chains[0])
+        #for chain in self.chains:
+            #print(chain)
 
         #request real time market data
         #self.ib.reqRealTimeBars(0,contract,5, "TRADES",0,[])
@@ -58,14 +69,14 @@ class Bot:
 
     def get_option_delta(self, contract):
         # Request market data for option contract including Greeks
-        market_data = self.ib.reqMktData(contract, genericTickList="100", snapshot=False, regulatorySnapshot=False)
+        ticker = self.ib.reqMktData(contract, snapshot=False, regulatorySnapshot=False)
 
         # Wait for the market data to be updated
         self.ib.sleep(2)  # Adjust sleep time as needed for data to arrive
         
         # Access the delta from the market data
-        if market_data:
-            delta = market_data.delta
+        if ticker:
+            delta = ticker.delta
             print(f"Option: {contract.symbol}, Delta: {delta}")
 
 #start bot

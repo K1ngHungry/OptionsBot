@@ -245,9 +245,9 @@ def main():
             ib, 
             'SPY', 
             delta_threshold=0.02,
-            restricted_strikes=restricted_strikes,
-            restricted_expirations=restricted_expirations,
-            restricted_types=restricted_types
+            #restricted_strikes=restricted_strikes,
+            #restricted_expirations=restricted_expirations,
+            #restricted_types=restricted_types
         )
         
         hedger.monitor_and_hedge()
